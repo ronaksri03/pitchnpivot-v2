@@ -1,0 +1,94 @@
+import { NextResponse } from "next/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAccountType } from "@/lib/accountType";
+import { signVerification } from "@/lib/verificationSignature";
+
+const POST_TABLE = { project: "manager_projects", job: "jobs" };
+const SUBMISSION_TABLE = { project: "project_submissions", job: "job_applications" };
+const POST_FK = { project: "project_id", job: "job_id" };
+
+export async function POST(request) {
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+  if (getAccountType(user) !== "manager") {
+    return NextResponse.json({ error: "Only manager accounts can verify reels." }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { reelId, type, postId, submissionId, projectTitle, verificationNote } = body;
+
+  if (!reelId || !type || !postId || !submissionId || !POST_TABLE[type]) {
+    return NextResponse.json({ error: "Missing or invalid request fields." }, { status: 400 });
+  }
+
+  // Defense-in-depth ownership check (patent claim 4): confirm this manager
+  // created the posting, and that the reel being verified is actually the
+  // one attached to that specific submission — independent of whatever RLS
+  // policy is (or isn't) configured on the database.
+  const { data: post } = await supabase
+    .from(POST_TABLE[type])
+    .select("id, manager_id")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (!post || post.manager_id !== user.id) {
+    return NextResponse.json({ error: "You don't own this posting." }, { status: 403 });
+  }
+
+  const { data: submission } = await supabase
+    .from(SUBMISSION_TABLE[type])
+    .select(`id, reel_id, ${POST_FK[type]}`)
+    .eq("id", submissionId)
+    .maybeSingle();
+
+  if (!submission || submission[POST_FK[type]] !== postId || submission.reel_id !== reelId) {
+    return NextResponse.json(
+      { error: "This reel isn't linked to that submission." },
+      { status: 403 }
+    );
+  }
+
+  const { data: manager } = await supabase
+    .from("managers")
+    .select("name, company")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const verifiedAt = new Date().toISOString();
+  const signature = signVerification({
+    reelId,
+    verifiedBy: user.id,
+    verifiedByName: manager?.name ?? null,
+    verifiedByCompany: manager?.company ?? null,
+    verifiedProjectTitle: projectTitle ?? null,
+    verifiedAt,
+  });
+
+  const { data: reel, error: updateError } = await supabase
+    .from("reels")
+    .update({
+      is_verified: true,
+      verified_by: user.id,
+      verified_by_name: manager?.name ?? null,
+      verified_by_company: manager?.company ?? null,
+      verified_at: verifiedAt,
+      verification_note: verificationNote || null,
+      verified_project_title: projectTitle ?? null,
+      verification_signature: signature,
+    })
+    .eq("id", reelId)
+    .select()
+    .single();
+
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 400 });
+  }
+
+  return NextResponse.json({ reel });
+}

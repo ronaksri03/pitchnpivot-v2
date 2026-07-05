@@ -33,12 +33,20 @@ export default async function VerifyCredentialPage({ params }) {
   const credential = await getVerifiedCredential(params.reelId);
   if (!credential) notFound();
 
-  const { reel, candidate, candidateName, fingerprint } = credential;
+  const { reel, candidate, candidateName, signatureValid, credentialId } = credential;
 
   return (
     <div className="cert-wrap">
       <div className="cert">
         <span className="cert-seal">✦ Verified Proof of Work</span>
+        {credentialId && (
+          <span
+            className={signatureValid ? "verified-count" : "pill rejected"}
+            style={{ marginLeft: 10 }}
+          >
+            {signatureValid ? "✓ Signature valid" : "⚠ Signature mismatch"}
+          </span>
+        )}
 
         <h1>{candidateName}</h1>
         <p className="cert-sub">
@@ -81,10 +89,21 @@ export default async function VerifyCredentialPage({ params }) {
         )}
 
         <p className="cert-fingerprint">
-          Credential ID: <b>{fingerprint}</b>
+          Credential ID: <b>{credentialId ?? "unsigned"}</b>
           <br />
-          This record is served live from pitchnpivot.com. The ID is a SHA-256 fingerprint of the
-          verifying employer, project, and timestamp shown above.
+          {credentialId ? (
+            <>
+              This record is served live from pitchnpivot.com. The ID is an HMAC-SHA256 signature
+              computed server-side at verification time over the verifying employer, project, and
+              timestamp shown above, using a secret key never exposed to the browser or database
+              clients — it cannot be reproduced without that key, so it can&apos;t be forged even
+              by someone with direct database access.
+              {!signatureValid &&
+                " The recomputed signature no longer matches what's stored — the verification fields shown above may have been altered after signing."}
+            </>
+          ) : (
+            "This verification predates signed credentials and has no integrity signature."
+          )}
         </p>
 
         <div className="cert-actions">

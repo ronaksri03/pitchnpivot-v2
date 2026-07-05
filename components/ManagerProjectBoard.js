@@ -33,6 +33,7 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
   const [verifying, setVerifying] = useState(null);
   const [verificationNote, setVerificationNote] = useState("");
   const [verifySaving, setVerifySaving] = useState(false);
+  const [verifyError, setVerifyError] = useState("");
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -135,28 +136,33 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
   function openVerify(submission) {
     setVerifying(submission);
     setVerificationNote("");
+    setVerifyError("");
   }
 
   async function handleVerify(e) {
     e.preventDefault();
     setVerifySaving(true);
+    setVerifyError("");
 
-    const supabase = getSupabaseBrowserClient();
-    const { error: updateError } = await supabase
-      .from("reels")
-      .update({
-        is_verified: true,
-        verified_by: managerId,
-        verified_by_name: manager?.name ?? null,
-        verified_by_company: manager?.company ?? null,
-        verified_at: new Date().toISOString(),
-        verification_note: verificationNote || null,
-        verified_project_title: selectedProject?.title ?? null,
-      })
-      .eq("id", verifying.reel_id);
+    const res = await fetch("/api/verify-reel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reelId: verifying.reel_id,
+        type: "project",
+        postId: selectedProject.id,
+        submissionId: verifying.id,
+        projectTitle: selectedProject?.title ?? null,
+        verificationNote,
+      }),
+    });
+    const result = await res.json();
 
     setVerifySaving(false);
-    if (updateError) return;
+    if (!res.ok) {
+      setVerifyError(result.error || "Something went wrong.");
+      return;
+    }
 
     setSubmissions(
       submissions.map((s) =>
@@ -421,6 +427,7 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
                 value={verificationNote}
                 onChange={(e) => setVerificationNote(e.target.value)}
               />
+              {verifyError && <p className="msg error">{verifyError}</p>}
               <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
                 <button type="submit" className="cta big" disabled={verifySaving}>
                   {verifySaving ? "Verifying…" : "Confirm verification"}
