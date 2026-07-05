@@ -1,21 +1,40 @@
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAccountType } from "@/lib/accountType";
+import { getOpenProjects, getManagerProjects, getMySubmissions } from "@/lib/projects";
+import IndividualProjectBoard from "@/components/IndividualProjectBoard";
+import ManagerProjectBoard from "@/components/ManagerProjectBoard";
+
 export const metadata = {
   title: "The Lab",
-  description: "Experiments, tools, and features in progress.",
+  description: "Open projects and collabs — post one, or find one to join.",
 };
 
-export default function LabPage() {
+export default async function LabPage() {
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/auth?next=/lab");
+
+  const accountType = getAccountType(user);
+
+  if (accountType === "manager") {
+    const projects = await getManagerProjects(user.id);
+    return <ManagerProjectBoard managerId={user.id} initialProjects={projects} />;
+  }
+
+  const [projects, submissions] = await Promise.all([
+    getOpenProjects(),
+    getMySubmissions(user.id),
+  ]);
+
   return (
-    <main>
-      <section style={{ paddingTop: 120, minHeight: "70dvh" }}>
-        <span className="label">The Lab</span>
-        <h1 className="display" style={{ fontSize: "clamp(34px,5vw,56px)" }}>
-          Experiments in progress.
-        </h1>
-        <p style={{ color: "var(--muted)", marginTop: 16, maxWidth: "48ch" }}>
-          New tools for pitching, matching, and getting discovered land here
-          first. Check back soon.
-        </p>
-      </section>
-    </main>
+    <IndividualProjectBoard
+      userId={user.id}
+      initialProjects={projects}
+      initialSubmissions={submissions}
+    />
   );
 }

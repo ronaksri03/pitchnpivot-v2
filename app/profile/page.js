@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAccountType } from "@/lib/accountType";
 import { getOwnReels } from "@/lib/reels";
 import ProfileForm from "@/components/ProfileForm";
 import ReelManager from "@/components/ReelManager";
+import ManagerProfileForm from "@/components/ManagerProfileForm";
 
 export const metadata = {
   title: "Your profile",
@@ -16,6 +18,39 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/auth?next=/profile");
+
+  if (getAccountType(user) === "manager") {
+    let { data: manager } = await supabase
+      .from("managers")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    // Self-heal: if signup happened while email confirmation was pending,
+    // AuthForm couldn't write this row yet (no session = no auth.uid()).
+    if (!manager) {
+      const { data: created } = await supabase
+        .from("managers")
+        .upsert({ id: user.id, name: user.email.split("@")[0], created_at: new Date().toISOString() })
+        .select("*")
+        .single();
+      manager = created;
+    }
+
+    return (
+      <main>
+        <section style={{ paddingTop: 120 }}>
+          <span className="label">Your profile</span>
+          <h1 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)" }}>
+            {manager?.name || "Welcome"}
+          </h1>
+          <p style={{ color: "var(--muted)", marginTop: 8, marginBottom: 32 }}>{user.email}</p>
+
+          <ManagerProfileForm userId={user.id} manager={manager} />
+        </section>
+      </main>
+    );
+  }
 
   let { data: profile } = await supabase
     .from("profiles")

@@ -1,18 +1,50 @@
+"use client";
+
 export default function ReelCard({ reel }) {
+  function openVideo() {
+    if (reel.videoUrl) window.open(reel.videoUrl, "_blank", "noopener,noreferrer");
+  }
+
+  async function handleShare() {
+    const url = reel.videoUrl || window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${reel.name}'s pitch`, url });
+      } catch {
+        // user cancelled the share sheet — no-op
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      window.alert("Link copied to clipboard");
+    }
+  }
+
   return (
     <div className="phone">
       <div className={`reel-frame reel-bg-${reel.bg}`}>
         <div className="progress">
           <i />
         </div>
-        <button className="playbtn" aria-label={`Play ${reel.name}'s pitch`}>
+        <button
+          type="button"
+          className="playbtn"
+          aria-label={reel.videoUrl ? `Play ${reel.name}'s pitch` : `${reel.name}'s pitch`}
+          onClick={openVideo}
+          disabled={!reel.videoUrl}
+        >
           ▶
         </button>
         <div className="reel-grad" />
         <div className="rail">
-          <button aria-label="Save">♡</button>
-          <button aria-label="Connect">＋</button>
-          <button aria-label="Share">↗</button>
+          <button type="button" aria-label="Save" title="Coming soon" disabled>
+            ♡
+          </button>
+          <button type="button" aria-label="Connect" title="Coming soon" disabled>
+            ＋
+          </button>
+          <button type="button" aria-label="Share" onClick={handleShare}>
+            ↗
+          </button>
         </div>
         <div className="reel-meta">
           <div className="reel-who">

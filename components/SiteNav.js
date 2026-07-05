@@ -63,6 +63,9 @@ export default function SiteNav() {
           ))}
           {user ? (
             <>
+              <Link href="/dashboard" className={pathname?.startsWith("/dashboard") ? "active" : ""}>
+                Dashboard
+              </Link>
               <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
                 Profile
               </Link>
@@ -99,6 +102,9 @@ export default function SiteNav() {
           ))}
           {user ? (
             <>
+              <Link href="/dashboard" className={pathname?.startsWith("/dashboard") ? "active" : ""}>
+                Dashboard
+              </Link>
               <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
                 Profile
               </Link>

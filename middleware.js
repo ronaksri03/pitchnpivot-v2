@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-const PROTECTED_PATHS = ["/discover", "/jobs", "/lab", "/profile"];
+const PROTECTED_PATHS = ["/discover", "/jobs", "/lab", "/profile", "/dashboard", "/portfolio"];
 
 export async function middleware(request) {
   let response = NextResponse.next({ request });
@@ -47,5 +47,12 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/discover/:path*", "/jobs/:path*", "/lab/:path*", "/profile/:path*"],
+  matcher: [
+    "/discover/:path*",
+    "/jobs/:path*",
+    "/lab/:path*",
+    "/profile/:path*",
+    "/dashboard/:path*",
+    "/portfolio/:path*",
+  ],
 };

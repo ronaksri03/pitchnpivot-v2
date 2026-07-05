@@ -11,11 +11,18 @@ export default function AuthForm() {
 
   const [mode, setMode] = useState("signin");
   const [role, setRole] = useState("individual");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [company, setCompany] = useState("");
+  const [managerRole, setManagerRole] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+
+  const isSignup = mode === "signup";
+  const isManager = role === "manager";
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -26,24 +33,37 @@ export default function AuthForm() {
     const supabase = getSupabaseBrowserClient();
 
     try {
-      if (mode === "signup") {
+      if (isSignup) {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: { data: { account_type: role } },
         });
         if (signUpError) throw signUpError;
 
         if (data.session) {
-          // Only write the profile once we actually have an authenticated
-          // session — RLS requires auth.uid() = id, which isn't set yet if
-          // email confirmation is pending (signUp() returns a user with no
-          // session in that case). The unconfirmed case is self-healed by
-          // /profile on first real sign-in instead.
-          await supabase.from("profiles").upsert({
-            id: data.user.id,
-            username: email.split("@")[0],
-            role,
-          });
+          // Only write the profile/manager row once we actually have an
+          // authenticated session — RLS requires auth.uid() = id, which
+          // isn't set yet if email confirmation is pending (signUp()
+          // returns a user with no session in that case). The unconfirmed
+          // case is self-healed on first real sign-in instead.
+          if (isManager) {
+            await supabase.from("managers").upsert({
+              id: data.user.id,
+              name: `${firstName} ${lastName}`.trim(),
+              company: company || null,
+              role: managerRole || null,
+              created_at: new Date().toISOString(),
+            });
+          } else {
+            await supabase.from("profiles").upsert({
+              id: data.user.id,
+              username: email.split("@")[0],
+              first_name: firstName,
+              last_name: lastName,
+              role: "individual",
+            });
+          }
           router.push(next);
           router.refresh();
         } else if (data.user && data.user.identities?.length === 0) {
@@ -57,11 +77,22 @@ export default function AuthForm() {
           setMode("signin");
         }
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (signInError) throw signInError;
+
+        const accountType = data.user?.user_metadata?.account_type;
+        if (accountType && accountType !== role) {
+          await supabase.auth.signOut();
+          throw new Error(
+            accountType === "manager"
+              ? "This is a manager account. Please select 'Manager' to sign in."
+              : "This is an individual account. Please select 'Individual' to sign in."
+          );
+        }
+
         router.push(next);
         router.refresh();
       }
@@ -99,7 +130,7 @@ export default function AuthForm() {
 
         <form onSubmit={handleSubmit} className="authform">
           <label className="fieldlabel">
-            {mode === "signup" ? "Sign up as" : "Sign in as"}
+            {isSignup ? "I am a" : "Sign in as"}
           </label>
           <div className="roleselect">
             <button
@@ -111,14 +142,72 @@ export default function AuthForm() {
             </button>
             <button
               type="button"
-              className="roleopt disabled"
-              disabled
-              title="Manager accounts are coming soon"
+              className={`roleopt ${role === "manager" ? "active" : ""}`}
+              onClick={() => setRole("manager")}
             >
               Manager — hiring or posting projects
-              <span className="soon">Coming soon</span>
             </button>
           </div>
+
+          {isSignup && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label className="fieldlabel" htmlFor="firstName">
+                  First name
+                </label>
+                <input
+                  id="firstName"
+                  className="field"
+                  placeholder="Alex"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="fieldlabel" htmlFor="lastName">
+                  Last name
+                </label>
+                <input
+                  id="lastName"
+                  className="field"
+                  placeholder="Chen"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          )}
+
+          {isSignup && isManager && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label className="fieldlabel" htmlFor="company">
+                  Company
+                </label>
+                <input
+                  id="company"
+                  className="field"
+                  placeholder="Acme Inc."
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="fieldlabel" htmlFor="managerRole">
+                  Your role
+                </label>
+                <input
+                  id="managerRole"
+                  className="field"
+                  placeholder="CTO, Founder…"
+                  value={managerRole}
+                  onChange={(e) => setManagerRole(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
 
           <label className="fieldlabel" htmlFor="email">
             Email
@@ -151,7 +240,11 @@ export default function AuthForm() {
           {notice && <p className="msg">{notice}</p>}
 
           <button type="submit" className="cta big" disabled={loading} style={{ width: "100%" }}>
-            {loading ? "Please wait…" : mode === "signin" ? "Sign in →" : "Sign up →"}
+            {loading
+              ? "Please wait…"
+              : isSignup
+              ? `Create ${isManager ? "manager" : "individual"} account →`
+              : "Sign in →"}
           </button>
         </form>
 
