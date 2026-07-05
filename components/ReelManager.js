@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const EMPTY_FORM = { title: "", url: "", skills: "", visibility: "public" };
+const MAX_REELS = 10;
 
 function toFormValues(reel) {
   return {
@@ -28,6 +29,10 @@ export default function ReelManager({ userId, initialReels }) {
   }
 
   function startNew() {
+    if (reels.length >= MAX_REELS) {
+      setError(`You can keep up to ${MAX_REELS} reels. Delete one to add another.`);
+      return;
+    }
     setEditingId("new");
     setForm(EMPTY_FORM);
     setError("");
@@ -51,6 +56,11 @@ export default function ReelManager({ userId, initialReels }) {
       .filter(Boolean);
 
     if (editingId === "new") {
+      if (reels.length >= MAX_REELS) {
+        setSaving(false);
+        setError(`You can keep up to ${MAX_REELS} reels. Delete one to add another.`);
+        return;
+      }
       const { data, error: insertError } = await supabase
         .from("reels")
         .insert({
@@ -117,6 +127,18 @@ export default function ReelManager({ userId, initialReels }) {
           <div key={reel.id} className="card job">
             <h3>{reel.title || "Untitled pitch"}</h3>
             <div className="co">{reel.visibility === "public" ? "Public" : "Private"}</div>
+            {reel.is_verified && (
+              <div className="verified-badge">
+                <span className="verified-star">✦</span>
+                <div>
+                  <b>Verified by {reel.verified_by_name || "an employer"}</b>
+                  {reel.verified_by_company && <span> · {reel.verified_by_company}</span>}
+                  {reel.verified_project_title && (
+                    <div className="verified-project">for “{reel.verified_project_title}”</div>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="chips">
               {(reel.skills || []).map((label) => (
                 <span key={label} className="chip">
@@ -203,9 +225,15 @@ export default function ReelManager({ userId, initialReels }) {
           </div>
         </form>
       ) : (
-        <button type="button" className="cta big" style={{ marginTop: 24 }} onClick={startNew}>
-          + Post a new pitch
-        </button>
+        <div style={{ marginTop: 24 }}>
+          {error && !editingId && <p className="msg error">{error}</p>}
+          <button type="button" className="cta big" onClick={startNew}>
+            + Post a new pitch
+          </button>
+          <p className="msg" style={{ marginTop: 8 }}>
+            {reels.length} / {MAX_REELS} reels used
+          </p>
+        </div>
       )}
     </div>
   );

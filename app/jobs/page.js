@@ -1,5 +1,9 @@
-import Link from "next/link";
-import { JOBS } from "@/lib/data";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAccountType } from "@/lib/accountType";
+import { getOpenJobs, getManagerJobs, getMyJobApplications } from "@/lib/jobs";
+import IndividualJobBoard from "@/components/IndividualJobBoard";
+import ManagerJobBoard from "@/components/ManagerJobBoard";
 
 export const metadata = {
   title: "Jobs that hire on proof, not paper",
@@ -7,34 +11,30 @@ export const metadata = {
     "Roles from teams that would rather watch what you can do than scan a CV.",
 };
 
-export default function JobsPage() {
+export default async function JobsPage() {
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/auth?next=/jobs");
+
+  const accountType = getAccountType(user);
+
+  if (accountType === "manager") {
+    const [jobs, { data: manager }] = await Promise.all([
+      getManagerJobs(user.id),
+      supabase.from("managers").select("name, company").eq("id", user.id).maybeSingle(),
+    ]);
+    return <ManagerJobBoard managerId={user.id} manager={manager} initialJobs={jobs} />;
+  }
+
+  const [jobs, applications] = await Promise.all([
+    getOpenJobs(),
+    getMyJobApplications(user.id),
+  ]);
+
   return (
-    <main>
-      <section style={{ paddingTop: 120 }}>
-        <span className="label">Open roles</span>
-        <div className="grid">
-          {JOBS.map((j) => (
-            <div key={j.id} className="card job">
-              <div className="top">
-                <div className="jlogo">{j.initial}</div>
-                <div>
-                  <h3>{j.title}</h3>
-                  <div className="co">{j.company} · {j.location}</div>
-                </div>
-              </div>
-              <div className="chips">
-                {j.skills.map((s) => (
-                  <span key={s.label} className={`chip ${s.hit ? "hit" : ""}`}>{s.label}</span>
-                ))}
-              </div>
-              <div className="foot">
-                <span>{j.salary}</span>
-                <Link href="#" className="apply">Apply with your pitch →</Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
+    <IndividualJobBoard userId={user.id} initialJobs={jobs} initialApplications={applications} />
   );
 }

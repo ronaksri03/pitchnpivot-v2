@@ -21,8 +21,13 @@ export default async function LabPage() {
   const accountType = getAccountType(user);
 
   if (accountType === "manager") {
-    const projects = await getManagerProjects(user.id);
-    return <ManagerProjectBoard managerId={user.id} initialProjects={projects} />;
+    const [projects, { data: manager }] = await Promise.all([
+      getManagerProjects(user.id),
+      supabase.from("managers").select("name, company").eq("id", user.id).maybeSingle(),
+    ]);
+    return (
+      <ManagerProjectBoard managerId={user.id} manager={manager} initialProjects={projects} />
+    );
   }
 
   const [projects, submissions] = await Promise.all([

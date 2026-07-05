@@ -20,7 +20,7 @@ const EMPTY_FORM = {
   visibility: "public",
 };
 
-export default function ManagerProjectBoard({ managerId, initialProjects }) {
+export default function ManagerProjectBoard({ managerId, manager, initialProjects }) {
   const [projects, setProjects] = useState(initialProjects);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -147,6 +147,8 @@ export default function ManagerProjectBoard({ managerId, initialProjects }) {
       .update({
         is_verified: true,
         verified_by: managerId,
+        verified_by_name: manager?.name ?? null,
+        verified_by_company: manager?.company ?? null,
         verified_at: new Date().toISOString(),
         verification_note: verificationNote || null,
         verified_project_title: selectedProject?.title ?? null,

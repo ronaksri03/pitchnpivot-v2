@@ -22,6 +22,20 @@ export default function ReelCard({ reel }) {
   return (
     <div className="phone">
       <div className={`reel-frame reel-bg-${reel.bg}`}>
+        {reel.isVerified && (
+          <div
+            className="reel-verified"
+            title={
+              reel.verifiedByName
+                ? `Verified by ${reel.verifiedByName}${
+                    reel.verifiedByCompany ? ` · ${reel.verifiedByCompany}` : ""
+                  }`
+                : "Employer-verified"
+            }
+          >
+            ✦ Verified
+          </div>
+        )}
         <div className="progress">
           <i />
         </div>
@@ -50,8 +64,19 @@ export default function ReelCard({ reel }) {
           <div className="reel-who">
             <div className="avatar" />
             <div>
-              <b>{reel.name}</b>
+              {reel.username ? (
+                <a href={`/u/${reel.username}`} className="reel-who-link">
+                  <b>{reel.name}</b>
+                </a>
+              ) : (
+                <b>{reel.name}</b>
+              )}
               <span>{reel.headline}</span>
+              {reel.verifiedCount > 0 && (
+                <div style={{ marginTop: 4 }}>
+                  <span className="verified-count">✦ {reel.verifiedCount} verified</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="chips">

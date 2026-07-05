@@ -88,7 +88,18 @@ export default async function ProfilePage() {
         <h1 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)" }}>
           {profile?.first_name || profile?.username || "Welcome"}
         </h1>
-        <p style={{ color: "var(--muted)", marginTop: 8, marginBottom: 32 }}>{user.email}</p>
+        <p style={{ color: "var(--muted)", marginTop: 8, marginBottom: 8 }}>{user.email}</p>
+        {profile?.username && (
+          <a
+            href={`/u/${profile.username}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="apply"
+            style={{ display: "inline-block", marginBottom: 32 }}
+          >
+            View public profile ↗
+          </a>
+        )}
 
         <ProfileForm userId={user.id} profile={profile} />
       </section>

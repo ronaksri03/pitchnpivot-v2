@@ -116,6 +116,17 @@ select.field{appearance:none}
 .pill.open{background:rgba(255,209,0,.18);color:var(--volt)}
 .pill.closed{background:rgba(255,255,255,.08);color:var(--muted)}
 
+/* Verified proof-of-work credential */
+.verified-badge{display:flex;gap:8px;align-items:flex-start;background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.35);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:12px;line-height:1.4}
+.verified-star{color:var(--volt);font-size:15px;flex-shrink:0}
+.verified-badge b{color:var(--volt);font-weight:700}
+.verified-project{color:var(--muted);margin-top:2px}
+.verified-note{color:var(--muted);margin-top:4px;font-style:italic}
+.reel-verified{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:4px;background:rgba(255,209,0,.92);color:#000;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px;box-shadow:0 4px 14px rgba(255,209,0,.35);z-index:2}
+.verified-count{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--volt);background:rgba(255,209,0,.14);border:1px solid rgba(255,209,0,.3);padding:3px 9px;border-radius:999px}
+.reel-who-link{text-decoration:none}
+.reel-who-link:hover b{color:var(--volt)}
+
 /* 404 */
 .nf{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:12px}
 .nf .code{color:var(--volt);font-weight:700;letter-spacing:.2em;font-size:13px}
