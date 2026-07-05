@@ -1,8 +1,14 @@
 import Link from "next/link";
 import ReelCard from "@/components/ReelCard";
-import { REELS, JOBS } from "@/lib/data";
+import { getReels } from "@/lib/reels";
+import { REELS as MOCK_REELS, JOBS } from "@/lib/data";
 
-export default function HomePage() {
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const reels = await getReels({ limit: 1 });
+  const heroReel = reels[0] ?? MOCK_REELS[0];
+
   return (
     <main>
       <section className="hero" id="start">
@@ -21,7 +27,7 @@ export default function HomePage() {
             <Link href="/discover" className="ghost">Watch pitches →</Link>
           </div>
         </div>
-        <ReelCard reel={REELS[0]} />
+        <ReelCard reel={heroReel} />
       </section>
 
       <section>
