@@ -81,6 +81,26 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 @keyframes sweep{100%{transform:translateX(100%) skewX(-12deg)}}
 @media (prefers-reduced-motion:reduce){.pulse::after{animation:none}.cta{transition:none}.job{transition:none}}
 
+/* Auth / forms */
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:24px}
+.tab{flex:1;background:none;border:none;color:var(--muted);font-weight:600;font-size:14px;padding:10px;border-radius:10px;cursor:pointer;transition:background .15s,color .15s}
+.tab.active{background:rgba(255,209,0,.14);color:var(--volt)}
+.authform{display:flex;flex-direction:column;gap:6px}
+.fieldlabel{font-size:12px;color:var(--muted);margin-top:14px;margin-bottom:2px}
+.field{background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px 14px;font-size:14px;font-family:inherit;width:100%}
+.field:focus{outline:none;border-color:rgba(255,209,0,.5)}
+.field::placeholder{color:var(--muted)}
+select.field{appearance:none}
+.roleselect{display:flex;flex-direction:column;gap:8px}
+.roleopt{position:relative;text-align:left;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font-size:13px;cursor:pointer;transition:border-color .15s}
+.roleopt.active{border-color:var(--volt);color:var(--volt)}
+.roleopt.disabled{color:var(--muted);cursor:not-allowed;opacity:.6}
+.soon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 8px}
+.msg{font-size:13px;color:var(--muted);margin-top:10px}
+.msg.error{color:#ff6b6b}
+.switchmode{margin-top:20px;text-align:center;font-size:13px;color:var(--muted)}
+.switchmode button{color:var(--volt);font-weight:700;background:none;border:none;cursor:pointer;font-size:13px}
+
 /* 404 */
 .nf{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:12px}
 .nf .code{color:var(--volt);font-weight:700;letter-spacing:.2em;font-size:13px}

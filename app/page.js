@@ -23,7 +23,7 @@ export default async function HomePage() {
             that hire on proof, not paper.
           </p>
           <div className="actions">
-            <Link href="/discover" className="cta big">Record your pitch</Link>
+            <Link href="/auth?next=/profile" className="cta big">Record your pitch</Link>
             <Link href="/discover" className="ghost">Watch pitches →</Link>
           </div>
         </div>

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const LINKS = [
   { href: "/discover", label: "Discover" },
@@ -12,8 +13,10 @@ const LINKS = [
 
 export default function SiteNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -23,6 +26,24 @@ export default function SiteNav() {
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = getSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className={`nav-shell ${scrolled || open ? "scrolled" : ""}`}>
@@ -40,9 +61,20 @@ export default function SiteNav() {
               {label}
             </Link>
           ))}
-          <Link href="/#start" className="cta">
-            Start your pitch
-          </Link>
+          {user ? (
+            <>
+              <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
+                Profile
+              </Link>
+              <button type="button" className="cta" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link href="/auth" className="cta">
+              Start your pitch
+            </Link>
+          )}
         </div>
         <button
           type="button"
@@ -65,9 +97,20 @@ export default function SiteNav() {
               {label}
             </Link>
           ))}
-          <Link href="/#start" className="cta">
-            Start your pitch
-          </Link>
+          {user ? (
+            <>
+              <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
+                Profile
+              </Link>
+              <button type="button" className="cta" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link href="/auth" className="cta">
+              Start your pitch
+            </Link>
+          )}
         </div>
       )}
     </header>
