@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
-const PROTECTED_PATHS = ["/discover", "/jobs", "/lab", "/profile", "/dashboard", "/portfolio"];
+// /discover is intentionally public (better for sharing/SEO); everything
+// account-specific stays gated.
+const PROTECTED_PATHS = ["/jobs", "/lab", "/profile", "/dashboard", "/portfolio", "/connections"];
 
 export async function middleware(request) {
   let response = NextResponse.next({ request });
@@ -54,5 +56,6 @@ export const config = {
     "/profile/:path*",
     "/dashboard/:path*",
     "/portfolio/:path*",
+    "/connections/:path*",
   ],
 };

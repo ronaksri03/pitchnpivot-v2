@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountType } from "@/lib/accountType";
 import { signVerification } from "@/lib/verificationSignature";
+import { notify } from "@/lib/notifications";
 
 const POST_TABLE = { project: "manager_projects", job: "jobs" };
 const SUBMISSION_TABLE = { project: "project_submissions", job: "job_applications" };
@@ -89,6 +90,18 @@ export async function POST(request) {
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 400 });
   }
+
+  await notify(supabase, {
+    userId: reel.user_id,
+    type: "reel_verified",
+    payload: {
+      reelId: reel.id,
+      reelTitle: reel.title,
+      verifiedByName: manager?.name ?? null,
+      verifiedByCompany: manager?.company ?? null,
+      projectTitle: projectTitle ?? null,
+    },
+  });
 
   return NextResponse.json({ reel });
 }

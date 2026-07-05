@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import NotificationBell from "@/components/NotificationBell";
 
 const LINKS = [
   { href: "/discover", label: "Discover" },
@@ -66,9 +67,13 @@ export default function SiteNav() {
               <Link href="/dashboard" className={pathname?.startsWith("/dashboard") ? "active" : ""}>
                 Dashboard
               </Link>
+              <Link href="/connections" className={pathname?.startsWith("/connections") ? "active" : ""}>
+                Connections
+              </Link>
               <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
                 Profile
               </Link>
+              <NotificationBell userId={user.id} />
               <button type="button" className="cta" onClick={handleSignOut}>
                 Sign out
               </button>
@@ -105,9 +110,13 @@ export default function SiteNav() {
               <Link href="/dashboard" className={pathname?.startsWith("/dashboard") ? "active" : ""}>
                 Dashboard
               </Link>
+              <Link href="/connections" className={pathname?.startsWith("/connections") ? "active" : ""}>
+                Connections
+              </Link>
               <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
                 Profile
               </Link>
+              <NotificationBell userId={user.id} />
               <button type="button" className="cta" onClick={handleSignOut}>
                 Sign out
               </button>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { notify } from "@/lib/notifications";
 
 const PAY_LABELS = {
   paid: "Paid",
@@ -67,6 +68,13 @@ export default function IndividualProjectBoard({ userId, initialProjects, initia
     }
 
     setSubmissions([data, ...submissions]);
+    if (applyingTo.manager_id) {
+      await notify(supabase, {
+        userId: applyingTo.manager_id,
+        type: "new_submission",
+        payload: { projectId: applyingTo.id, projectTitle: applyingTo.title },
+      });
+    }
     setApplyingTo(null);
   }
 

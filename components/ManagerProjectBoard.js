@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { notify } from "@/lib/notifications";
 
 const PAY_TYPES = [
   { value: "paid", label: "Paid" },
@@ -131,6 +132,11 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
 
     if (updateError) return;
     setSubmissions(submissions.map((s) => (s.id === submission.id ? { ...s, status } : s)));
+    await notify(supabase, {
+      userId: submission.individual_id,
+      type: "submission_status",
+      payload: { projectId: selectedProject.id, projectTitle: selectedProject.title, status },
+    });
   }
 
   function openVerify(submission) {

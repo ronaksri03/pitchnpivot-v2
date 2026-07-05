@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { notify } from "@/lib/notifications";
 
 const WORK_TYPES = ["remote", "hybrid", "onsite"];
 const EMPLOYMENT_TYPES = ["full-time", "part-time", "contract", "freelance", "internship"];
@@ -148,6 +149,11 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
 
     if (updateError) return;
     setApplicants(applicants.map((a) => (a.id === application.id ? { ...a, status } : a)));
+    await notify(supabase, {
+      userId: application.individual_id,
+      type: "application_status",
+      payload: { jobId: selectedJob.id, jobTitle: selectedJob.title, status },
+    });
   }
 
   function openVerify(application) {
