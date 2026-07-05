@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import CopyCredentialLink from "@/components/CopyCredentialLink";
 
 const EMPTY_FORM = { title: "", url: "", skills: "", visibility: "public" };
 const MAX_REELS = 10;
@@ -136,6 +137,12 @@ export default function ReelManager({ userId, initialReels }) {
                   {reel.verified_project_title && (
                     <div className="verified-project">for “{reel.verified_project_title}”</div>
                   )}
+                  <div style={{ display: "flex", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+                    <a href={`/verify/${reel.id}`} className="apply" style={{ fontSize: 12 }}>
+                      View credential ↗
+                    </a>
+                    <CopyCredentialLink reelId={reel.id} label="Copy link" />
+                  </div>
                 </div>
               </div>
             )}

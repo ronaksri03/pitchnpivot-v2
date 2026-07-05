@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPublicProfile } from "@/lib/reels";
+import CopyCredentialLink from "@/components/CopyCredentialLink";
 
 export const revalidate = 60;
 
@@ -96,6 +97,14 @@ export default async function PublicProfilePage({ params }) {
                     <a href={reel.url} target="_blank" rel="noopener noreferrer" className="apply">
                       Watch pitch ↗
                     </a>
+                  )}
+                  {reel.is_verified && (
+                    <>
+                      <a href={`/verify/${reel.id}`} className="apply">
+                        View credential ↗
+                      </a>
+                      <CopyCredentialLink reelId={reel.id} label="Copy link" />
+                    </>
                   )}
                 </div>
               </div>

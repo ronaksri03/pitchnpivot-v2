@@ -127,6 +127,20 @@ select.field{appearance:none}
 .reel-who-link{text-decoration:none}
 .reel-who-link:hover b{color:var(--volt)}
 
+/* Shareable credential certificate */
+.cert-wrap{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:88px 24px 48px}
+.cert{max-width:620px;width:100%;background:linear-gradient(180deg,rgba(255,209,0,.06),transparent 40%),var(--surface);border:1px solid rgba(255,209,0,.3);border-radius:22px;padding:40px}
+.cert-seal{display:inline-flex;align-items:center;gap:8px;color:var(--volt);font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,209,0,.4);border-radius:999px;padding:7px 14px}
+.cert h1{font-family:Archivo,"Arial Black",sans-serif;font-weight:900;font-size:clamp(24px,4vw,34px);letter-spacing:-.02em;margin:22px 0 6px;text-transform:uppercase}
+.cert .cert-sub{color:var(--muted);font-size:15px}
+.cert-row{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line);font-size:14px}
+.cert-row .k{color:var(--muted)}
+.cert-row .v{font-weight:600;text-align:right}
+.cert-note{background:rgba(255,255,255,.04);border-left:2px solid var(--volt);border-radius:0 10px 10px 0;padding:12px 16px;margin:18px 0;font-style:italic;color:var(--text);font-size:14px}
+.cert-fingerprint{margin-top:20px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}
+.cert-fingerprint b{color:var(--text);letter-spacing:.08em}
+.cert-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+
 /* 404 */
 .nf{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:12px}
 .nf .code{color:var(--volt);font-weight:700;letter-spacing:.2em;font-size:13px}
