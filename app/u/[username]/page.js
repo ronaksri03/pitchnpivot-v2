@@ -10,7 +10,7 @@ export async function generateMetadata({ params }) {
     [data.profile.first_name, data.profile.last_name].filter(Boolean).join(" ") ||
     data.profile.username;
   return {
-    title: `${name} — pitchNpivot`,
+    title: name,
     description: data.profile.job_title
       ? `${name}, ${data.profile.job_title}. Watch their employer-verified pitch reels.`
       : `${name} on pitchNpivot.`,
