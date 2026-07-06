@@ -75,8 +75,8 @@ export default async function DashboardPage() {
     { label: "Projects", value: stats.projects, href: "/portfolio" },
     { label: "Profile Views", value: stats.views, href: "/profile" },
     { label: "Applications", value: stats.submissions, href: "/lab" },
-    { label: "Accepted", value: stats.accepted, href: "/lab" },
-    { label: "Pending", value: stats.pending, href: "/lab" },
+    { label: "Accepted", value: stats.accepted, href: "/lab#accepted" },
+    { label: "Pending", value: stats.pending, href: "/lab#pending" },
   ];
 
   return (
