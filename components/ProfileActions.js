@@ -90,6 +90,11 @@ export default function ProfileActions({ ownerId, username }) {
           {connectLabel}
         </button>
       )}
+      {!isOwner && connection?.status === "accepted" && (
+        <a href={`/messages/${ownerId}`} className="ghost">
+          Message
+        </a>
+      )}
       <button type="button" className="ghost" onClick={handleCopy}>
         {copied ? "Link copied ✓" : "Share profile"}
       </button>

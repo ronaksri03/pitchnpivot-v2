@@ -70,6 +70,9 @@ export default function SiteNav() {
               <Link href="/connections" className={pathname?.startsWith("/connections") ? "active" : ""}>
                 Connections
               </Link>
+              <Link href="/messages" className={pathname?.startsWith("/messages") ? "active" : ""}>
+                Messages
+              </Link>
               <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
                 Profile
               </Link>
@@ -112,6 +115,9 @@ export default function SiteNav() {
               </Link>
               <Link href="/connections" className={pathname?.startsWith("/connections") ? "active" : ""}>
                 Connections
+              </Link>
+              <Link href="/messages" className={pathname?.startsWith("/messages") ? "active" : ""}>
+                Messages
               </Link>
               <Link href="/profile" className={pathname?.startsWith("/profile") ? "active" : ""}>
                 Profile

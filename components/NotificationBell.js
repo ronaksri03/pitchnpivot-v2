@@ -29,6 +29,8 @@ function describe(n) {
       return { text: "You have a new connection request", href: "/connections" };
     case "connection_accepted":
       return { text: "Your connection request was accepted", href: "/connections" };
+    case "new_message":
+      return { text: "You have a new message", href: p.from ? `/messages/${p.from}` : "/messages" };
     default:
       return { text: "New notification", href: "#" };
   }

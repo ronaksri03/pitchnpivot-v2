@@ -216,6 +216,18 @@ select.field{appearance:none}
 .nf p{color:var(--muted);margin-bottom:14px}
 .nf .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 
+/* Messaging */
+.msg-avatar{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;font-family:Archivo,"Arial Black",sans-serif;font-weight:900;font-size:16px;color:#000;background:linear-gradient(135deg,#FFD100,#FF7A00)}
+.thread-head{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.thread{display:flex;flex-direction:column;height:min(60vh,520px);border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--surface)}
+.thread-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.4;word-break:break-word}
+.bubble.mine{align-self:flex-end;background:rgba(255,209,0,.92);color:#000;border-bottom-right-radius:4px}
+.bubble.theirs{align-self:flex-start;background:rgba(255,255,255,.08);color:var(--text);border-bottom-left-radius:4px}
+.thread-compose{display:flex;gap:10px;padding:12px;border-top:1px solid var(--line)}
+.thread-compose .field{flex:1}
+.thread-compose .cta{cursor:pointer;white-space:nowrap}
+
 /* Global footer */
 .site-footer{border-top:1px solid var(--line);margin-top:40px}
 .footer-inner{max-width:1100px;margin:0 auto;padding:48px 24px 32px;display:grid;grid-template-columns:1.4fr 2fr;gap:40px}

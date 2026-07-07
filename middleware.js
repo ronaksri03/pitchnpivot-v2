@@ -3,7 +3,15 @@ import { NextResponse } from "next/server";
 
 // /discover is intentionally public (better for sharing/SEO); everything
 // account-specific stays gated.
-const PROTECTED_PATHS = ["/jobs", "/lab", "/profile", "/dashboard", "/portfolio", "/connections"];
+const PROTECTED_PATHS = [
+  "/jobs",
+  "/lab",
+  "/profile",
+  "/dashboard",
+  "/portfolio",
+  "/connections",
+  "/messages",
+];
 
 export async function middleware(request) {
   let response = NextResponse.next({ request });
@@ -57,5 +65,6 @@ export const config = {
     "/dashboard/:path*",
     "/portfolio/:path*",
     "/connections/:path*",
+    "/messages/:path*",
   ],
 };
