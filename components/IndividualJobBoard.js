@@ -29,8 +29,6 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const applicationByJob = new Map(applications.map((a) => [a.job_id, a]));
-
   async function openApply(job) {
     setApplyingTo(job);
     setVideoUrl("");
@@ -86,6 +84,62 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
     setApplyingTo(null);
   }
 
+  // Group by the viewer's application status, mirroring the Project Lab.
+  const openById = new Map(initialJobs.map((j) => [j.id, j]));
+  const appliedIds = new Set(applications.map((a) => a.job_id));
+
+  const applied = { accepted: [], pending: [], rejected: [] };
+  for (const app of applications) {
+    const open = openById.get(app.job_id);
+    const job = open || app.job || { id: app.job_id, title: "Role" };
+    (applied[app.status] || applied.pending).push({ job, application: app });
+  }
+  const notApplied = initialJobs.filter((j) => !appliedIds.has(j.id));
+  const hasAnyApplication = applications.length > 0;
+
+  function renderJobCard(job, application) {
+    return (
+      <div key={job.id} className="card job">
+        <div className="top">
+          <div className="jlogo">{job.manager?.company?.[0] ?? "?"}</div>
+          <div>
+            <h3>{job.title}</h3>
+            {(job.manager?.company || job.work_type) && (
+              <div className="co">
+                {[job.manager?.company, job.location || job.work_type].filter(Boolean).join(" · ")}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="chips">
+          {job.work_type && <span className="chip">{job.work_type}</span>}
+          {job.employment_type && <span className="chip">{job.employment_type}</span>}
+          {(job.skills_required ?? []).map((s) => (
+            <span key={s} className="chip">
+              {s}
+            </span>
+          ))}
+        </div>
+        <div className="foot">
+          <span>{formatSalary(job)}</span>
+          {application ? (
+            <span className={`pill ${application.status}`}>{application.status}</span>
+          ) : (
+            <button type="button" className="apply" onClick={() => openApply(job)}>
+              Apply with your pitch →
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const groups = [
+    { id: "accepted", label: "Accepted", items: applied.accepted },
+    { id: "pending", label: "Pending", items: applied.pending },
+    { id: "rejected", label: "Rejected", items: applied.rejected },
+  ];
+
   return (
     <main>
       <section style={{ paddingTop: 120 }}>
@@ -97,49 +151,32 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
           Roles from teams that would rather watch what you can do than scan a CV.
         </p>
 
-        {initialJobs.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", color: "var(--muted)" }}>
-            No open roles right now — check back soon.
-          </div>
-        ) : (
-          <div className="grid">
-            {initialJobs.map((job) => {
-              const application = applicationByJob.get(job.id);
-              return (
-                <div key={job.id} className="card job">
-                  <div className="top">
-                    <div className="jlogo">{job.manager?.company?.[0] ?? "?"}</div>
-                    <div>
-                      <h3>{job.title}</h3>
-                      <div className="co">
-                        {job.manager?.company} · {job.location || job.work_type}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="chips">
-                    <span className="chip">{job.work_type}</span>
-                    <span className="chip">{job.employment_type}</span>
-                    {(job.skills_required ?? []).map((s) => (
-                      <span key={s} className="chip">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="foot">
-                    <span>{formatSalary(job)}</span>
-                    {application ? (
-                      <span className={`pill ${application.status}`}>{application.status}</span>
-                    ) : (
-                      <button type="button" className="apply" onClick={() => openApply(job)}>
-                        Apply with your pitch →
-                      </button>
-                    )}
-                  </div>
+        {hasAnyApplication &&
+          groups
+            .filter((g) => g.items.length > 0)
+            .map((g) => (
+              <div key={g.id} id={g.id} style={{ marginBottom: 36, scrollMarginTop: 90 }}>
+                <span className="label">
+                  {g.label} ({g.items.length})
+                </span>
+                <div className="grid">
+                  {g.items.map(({ job, application }) => renderJobCard(job, application))}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            ))}
+
+        <div id="open" style={{ scrollMarginTop: 90 }}>
+          <span className="label">Open — not yet applied ({notApplied.length})</span>
+          {notApplied.length === 0 ? (
+            <div className="card" style={{ textAlign: "center", color: "var(--muted)" }}>
+              {hasAnyApplication
+                ? "You've applied to every open role. Nice."
+                : "No open roles right now — check back soon."}
+            </div>
+          ) : (
+            <div className="grid">{notApplied.map((job) => renderJobCard(job, null))}</div>
+          )}
+        </div>
       </section>
 
       {applyingTo && (

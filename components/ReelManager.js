@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import CopyCredentialLink from "@/components/CopyCredentialLink";
+import { getThumbnailUrl } from "@/lib/videoEmbed";
 
 const EMPTY_FORM = { title: "", url: "", skills: "", visibility: "public" };
 const MAX_REELS = 10;
@@ -123,51 +124,67 @@ export default function ReelManager({ userId, initialReels }) {
 
   return (
     <div>
-      <div className="grid">
-        {reels.map((reel) => (
-          <div key={reel.id} className="card job">
-            <h3>{reel.title || "Untitled pitch"}</h3>
-            <div className="co">{reel.visibility === "public" ? "Public" : "Private"}</div>
-            {reel.is_verified && (
-              <div className="verified-badge">
-                <span className="verified-star">✦</span>
-                <div>
-                  <b>Verified by {reel.verified_by_name || "an employer"}</b>
-                  {reel.verified_by_company && <span> · {reel.verified_by_company}</span>}
-                  {reel.verified_project_title && (
-                    <div className="verified-project">for “{reel.verified_project_title}”</div>
-                  )}
-                  <div style={{ display: "flex", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
-                    <a href={`/verify/${reel.id}`} className="apply" style={{ fontSize: 12 }}>
-                      View credential ↗
-                    </a>
-                    <CopyCredentialLink reelId={reel.id} label="Copy link" />
+      <div className="pgrid">
+        {reels.map((reel) => {
+          const thumb = getThumbnailUrl(reel.url);
+          return (
+            <div key={reel.id} className="pcard">
+              <a
+                href={reel.url || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pcard-thumb"
+                style={thumb ? { backgroundImage: `url(${thumb})` } : undefined}
+                aria-label={`Watch ${reel.title || "pitch"}`}
+              >
+                <span className="pcard-play">▶</span>
+                {reel.is_verified && <span className="pcard-verified">✦ Verified</span>}
+                <span className="pcard-vis">{reel.visibility === "public" ? "Public" : "Private"}</span>
+              </a>
+              <div className="pcard-body">
+                <h3>{reel.title || "Untitled pitch"}</h3>
+                {reel.is_verified && (
+                  <div className="verified-badge">
+                    <span className="verified-star">✦</span>
+                    <div>
+                      <b>Verified by {reel.verified_by_name || "an employer"}</b>
+                      {reel.verified_by_company && <span> · {reel.verified_by_company}</span>}
+                      {reel.verified_project_title && (
+                        <div className="verified-project">for “{reel.verified_project_title}”</div>
+                      )}
+                      <div style={{ display: "flex", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+                        <a href={`/verify/${reel.id}`} className="apply" style={{ fontSize: 12 }}>
+                          View credential ↗
+                        </a>
+                        <CopyCredentialLink reelId={reel.id} label="Copy link" />
+                      </div>
+                    </div>
                   </div>
+                )}
+                <div className="chips">
+                  {(reel.skills || []).map((label) => (
+                    <span key={label} className="chip">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+                <div className="foot">
+                  <button type="button" className="apply" onClick={() => startEdit(reel)}>
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="apply"
+                    style={{ color: "#ff6b6b" }}
+                    onClick={() => handleDelete(reel.id)}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-            )}
-            <div className="chips">
-              {(reel.skills || []).map((label) => (
-                <span key={label} className="chip">
-                  {label}
-                </span>
-              ))}
             </div>
-            <div className="foot">
-              <button type="button" className="apply" onClick={() => startEdit(reel)}>
-                Edit
-              </button>
-              <button
-                type="button"
-                className="apply"
-                style={{ color: "#ff6b6b" }}
-                onClick={() => handleDelete(reel.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {editingId ? (
