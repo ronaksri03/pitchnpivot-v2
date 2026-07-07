@@ -77,6 +77,14 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 
 /* Discover: heading + responsive feed */
 .discover-head{padding-top:130px;padding-bottom:8px}
+.discover-filters{max-width:1180px;margin:0 auto;padding:8px 24px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.discover-search{max-width:420px;flex:1;min-width:220px}
+.filter-toggle{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;padding:11px 16px;border-radius:12px;cursor:pointer;transition:border-color .15s,color .15s}
+.filter-toggle.active{border-color:var(--volt);color:var(--volt);background:rgba(255,209,0,.1)}
+.discover-skills{max-width:1180px;margin:0 auto;padding:14px 24px 0;display:flex;gap:8px;flex-wrap:wrap}
+.discover-skills .chip{cursor:pointer;border:1px solid transparent;transition:border-color .15s}
+.discover-skills .chip:hover{border-color:rgba(255,209,0,.4)}
+.discover-empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0}
 /* Desktop: multi-column grid of pitch cards */
 .feed{max-width:1180px;margin:0 auto;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:32px;justify-items:center}
 .feed-item{width:100%;display:flex;justify-content:center}
@@ -84,7 +92,7 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 
 /* Mobile: immersive full-screen snap feed */
 @media (max-width:820px){
-  .discover-head{display:none}
+  .discover-head,.discover-filters,.discover-skills{display:none}
   .feed{max-width:none;margin:0;height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;padding:56px 0 0;display:block}
   .feed-item{height:calc(100dvh - 56px);scroll-snap-align:start;display:grid;place-items:center;padding:16px}
   .feed-item .phone{width:min(340px,88vw)}

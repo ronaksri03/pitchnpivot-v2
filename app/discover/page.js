@@ -1,4 +1,4 @@
-import ReelCard from "@/components/ReelCard";
+import DiscoverFeed from "@/components/DiscoverFeed";
 import { getReels } from "@/lib/reels";
 import { REELS as MOCK_REELS } from "@/lib/data";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -31,13 +31,7 @@ export default async function DiscoverPage() {
         </p>
       </section>
 
-      <div className="feed" aria-label="Pitch feed">
-        {feed.map((reel) => (
-          <div key={reel.id} className="feed-item">
-            <ReelCard reel={reel} isLoggedIn={!!user} viewerId={user?.id ?? null} />
-          </div>
-        ))}
-      </div>
+      <DiscoverFeed reels={feed} isLoggedIn={!!user} viewerId={user?.id ?? null} />
     </main>
   );
 }
