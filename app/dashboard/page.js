@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getAccountType } from "@/lib/accountType";
+import { getManagerDashboard } from "@/lib/managerDashboard";
+import ManagerDashboard from "@/components/ManagerDashboard";
 
 export const metadata = {
   title: "Dashboard",
@@ -21,7 +23,11 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/auth?next=/dashboard");
-  if (getAccountType(user) === "manager") redirect("/lab");
+
+  if (getAccountType(user) === "manager") {
+    const { stats, recent } = await getManagerDashboard(user.id);
+    return <ManagerDashboard stats={stats} recent={recent} />;
+  }
 
   const [reelsRes, projectsRes, viewsRes, submissionsRes] = await Promise.all([
     supabase.from("reels").select("id", { count: "exact", head: true }).eq("user_id", user.id),
