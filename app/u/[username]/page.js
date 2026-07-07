@@ -98,8 +98,23 @@ export default async function PublicProfilePage({ params }) {
   const verified = reels.filter((r) => r.is_verified);
   const unverified = reels.filter((r) => !r.is_verified);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name,
+    url: `https://www.pitchnpivot.com/u/${profile.username}`,
+    ...(profile.job_title ? { jobTitle: profile.job_title } : {}),
+    ...(profile.location ? { address: profile.location } : {}),
+    ...(profile.bio ? { description: profile.bio } : {}),
+    ...(profile.skills?.length ? { knowsAbout: profile.skills } : {}),
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="profile-cover" />
       <section style={{ paddingTop: 0, marginTop: -56 }}>
         <div className="profile-head">
