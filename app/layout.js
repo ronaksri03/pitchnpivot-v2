@@ -1,5 +1,6 @@
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata = {
   metadataBase: new URL("https://www.pitchnpivot.com"),
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
       <body>
         <SiteNav />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

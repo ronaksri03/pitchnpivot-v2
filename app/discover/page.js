@@ -19,12 +19,25 @@ export default async function DiscoverPage() {
   const feed = reels.length ? reels : MOCK_REELS;
 
   return (
-    <main className="feed" aria-label="Pitch feed">
-      {feed.map((reel) => (
-        <div key={reel.id} className="feed-item">
-          <ReelCard reel={reel} isLoggedIn={!!user} viewerId={user?.id ?? null} />
-        </div>
-      ))}
+    <main>
+      <section className="discover-head">
+        <span className="label">Discover talent</span>
+        <h1 className="display" style={{ fontSize: "clamp(30px,4.5vw,52px)" }}>
+          Watch the pitch, skip the résumé
+        </h1>
+        <p style={{ color: "var(--muted)", marginTop: 10, maxWidth: "52ch" }}>
+          {feed.length} {feed.length === 1 ? "pitch" : "pitches"} from real people.
+          Employer-verified talent shows up first.
+        </p>
+      </section>
+
+      <div className="feed" aria-label="Pitch feed">
+        {feed.map((reel) => (
+          <div key={reel.id} className="feed-item">
+            <ReelCard reel={reel} isLoggedIn={!!user} viewerId={user?.id ?? null} />
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

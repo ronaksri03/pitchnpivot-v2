@@ -36,6 +36,15 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 .ghost{border:1px solid rgba(255,255,255,.2);padding:11px 20px;border-radius:999px;font-weight:600;font-size:15px}
 .cta.big{padding:12px 24px;font-size:15px}
 
+/* How it works */
+.howitworks{padding-top:40px;padding-bottom:40px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px}
+.step-num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(255,209,0,.15);color:var(--volt);font-family:Archivo,"Arial Black",sans-serif;font-weight:900;font-size:16px;margin-bottom:14px}
+.step h3{font-size:17px;margin-bottom:8px}
+.step p{color:var(--muted);font-size:14px}
+@media (max-width:820px){.steps{grid-template-columns:1fr}}
+
 /* Phone / reel */
 .phone{width:290px;aspect-ratio:9/17.5;border-radius:36px;border:1px solid rgba(255,255,255,.14);background:var(--surface);padding:10px;margin:0 auto;box-shadow:0 40px 80px rgba(0,0,0,.55),0 0 90px rgba(255,209,0,.06)}
 .reel-frame{position:relative;height:100%;border-radius:28px;overflow:hidden}
@@ -66,10 +75,20 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 .progress{position:absolute;top:12px;left:12px;right:12px;height:3px;border-radius:3px;background:rgba(255,255,255,.18)}
 .progress i{display:block;width:38%;height:100%;border-radius:3px;background:var(--volt)}
 
-/* Discover snap feed */
-.feed{height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;padding-top:56px}
-.feed-item{height:calc(100dvh - 56px);scroll-snap-align:start;display:grid;place-items:center;padding:16px}
-.feed-item .phone{width:min(340px,88vw)}
+/* Discover: heading + responsive feed */
+.discover-head{padding-top:130px;padding-bottom:8px}
+/* Desktop: multi-column grid of pitch cards */
+.feed{max-width:1180px;margin:0 auto;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:32px;justify-items:center}
+.feed-item{width:100%;display:flex;justify-content:center}
+.feed-item .phone{width:min(320px,100%)}
+
+/* Mobile: immersive full-screen snap feed */
+@media (max-width:820px){
+  .discover-head{display:none}
+  .feed{max-width:none;margin:0;height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;padding:56px 0 0;display:block}
+  .feed-item{height:calc(100dvh - 56px);scroll-snap-align:start;display:grid;place-items:center;padding:16px}
+  .feed-item .phone{width:min(340px,88vw)}
+}
 
 /* Cards / jobs */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
@@ -82,6 +101,28 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 .job .co{font-size:13px;color:var(--muted)}
 .job .foot{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);gap:8px;flex-wrap:wrap}
 .apply{color:var(--volt);font-weight:700;font-size:13px}
+
+/* Public profile */
+.profile-cover{height:180px;background:linear-gradient(120deg,rgba(255,209,0,.18),rgba(255,122,0,.1) 45%,transparent),var(--surface);border-bottom:1px solid var(--line)}
+.profile-head{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap}
+.profile-avatar{width:104px;height:104px;border-radius:24px;flex-shrink:0;display:grid;place-items:center;font-family:Archivo,"Arial Black",sans-serif;font-weight:900;font-size:36px;color:#000;background:linear-gradient(135deg,#FFD100,#FF7A00);border:3px solid var(--bg);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.profile-headmeta{flex:1;min-width:220px;padding-bottom:4px}
+.profile-headmeta .label{margin-bottom:10px}
+.profile-stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.profile-stat{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.profile-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:6px}
+.profile-actions .cta.big{cursor:pointer}
+.profile-actions .ghost{cursor:pointer;background:none}
+
+/* Portfolio-style reel cards with video thumbnail */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,transform .15s}
+.pcard:hover{border-color:rgba(255,209,0,.4);transform:translateY(-2px)}
+.pcard-thumb{position:relative;display:block;aspect-ratio:16/10;background:linear-gradient(135deg,#2a2440,#123028);background-size:cover;background-position:center}
+.pcard-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,209,0,.92);display:grid;place-items:center;color:#000;font-size:16px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.pcard-verified{position:absolute;top:10px;right:10px;background:rgba(255,209,0,.92);color:#000;font-size:11px;font-weight:800;padding:4px 9px;border-radius:999px}
+.pcard-body{padding:16px;display:flex;flex-direction:column;gap:10px}
+.pcard-body h3{font-size:15px}
 
 /* Skeleton pulse */
 .pulse{position:relative;overflow:hidden;background:rgba(255,255,255,.06);border-radius:8px}
@@ -166,7 +207,20 @@ select.field{appearance:none}
 .nf p{color:var(--muted);margin-bottom:14px}
 .nf .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 
-footer{border-top:1px solid var(--line);padding:34px 24px;text-align:center;color:var(--muted);font-size:13px}
+/* Global footer */
+.site-footer{border-top:1px solid var(--line);margin-top:40px}
+.footer-inner{max-width:1100px;margin:0 auto;padding:48px 24px 32px;display:grid;grid-template-columns:1.4fr 2fr;gap:40px}
+.footer-brand p{color:var(--muted);font-size:14px;margin-top:14px;max-width:34ch}
+.footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.footer-col{display:flex;flex-direction:column;gap:10px}
+.footer-heading{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:4px}
+.footer-col a{color:var(--muted);font-size:14px;transition:color .15s}
+.footer-col a:hover{color:var(--volt)}
+.footer-bottom{max-width:1100px;margin:0 auto;padding:18px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:12px;gap:12px;flex-wrap:wrap}
+@media (max-width:820px){
+  .footer-inner{grid-template-columns:1fr;gap:28px}
+  .footer-cols{grid-template-columns:repeat(3,1fr)}
+}
 
 @media (max-width:820px){
   .hero{grid-template-columns:1fr;padding-top:120px;text-align:center}
