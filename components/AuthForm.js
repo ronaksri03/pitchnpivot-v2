@@ -18,7 +18,7 @@ export default function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(searchParams.get("error") || "");
   const [notice, setNotice] = useState("");
 
   const isSignup = mode === "signup";
@@ -49,7 +49,12 @@ export default function AuthForm() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { account_type: role } },
+          options: {
+            data: { account_type: role },
+            // Land the email-confirmation link on our callback route (which
+            // exchanges the code for a session), not the site root.
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          },
         });
         if (signUpError) throw signUpError;
 
