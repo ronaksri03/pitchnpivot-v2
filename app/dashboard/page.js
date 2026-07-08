@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     return <ManagerDashboard stats={stats} recent={recent} />;
   }
 
-  const [reelsRes, projectsRes, viewsRes, submissionsRes] = await Promise.all([
+  const [reelsRes, projectsRes, viewsRes, submissionsRes, certsRes] = await Promise.all([
     supabase.from("reels").select("id", { count: "exact", head: true }).eq("user_id", user.id),
     supabase
       .from("individual_projects")
@@ -47,7 +47,15 @@ export default async function DashboardPage() {
       .eq("individual_id", user.id)
       .order("submitted_at", { ascending: false })
       .limit(10),
+    supabase
+      .from("reels")
+      .select("id, title, verified_by_name, verified_by_company, verified_project_title, verified_at")
+      .eq("user_id", user.id)
+      .eq("is_verified", true)
+      .order("verified_at", { ascending: false }),
   ]);
+
+  const certificates = certsRes.data ?? [];
 
   const submissions = submissionsRes.data ?? [];
   const views = viewsRes.data ?? [];
@@ -117,6 +125,56 @@ export default async function DashboardPage() {
           <Link href="/portfolio" className="ghost">
             + Add Project
           </Link>
+        </div>
+
+        <div style={{ marginBottom: 40 }}>
+          <span className="label">✦ Your certificates</span>
+          {certificates.length === 0 ? (
+            <div className="card" style={{ color: "var(--muted)", lineHeight: 1.6 }}>
+              You don&apos;t have any certificates yet.
+              <br />
+              Here&apos;s how to earn one: apply to a project or job on the{" "}
+              <Link href="/lab" className="apply">
+                Lab
+              </Link>{" "}
+              (or{" "}
+              <Link href="/jobs" className="apply">
+                Jobs
+              </Link>
+              ) and attach one of your pitch reels. When the employer reviews your work and clicks
+              &ldquo;Verify Reel,&rdquo; you earn a <b style={{ color: "var(--text)" }}>Certificate
+              of Verified Work</b> — a permanent, signed credential you can showcase, share, and
+              print from here and your public profile.
+            </div>
+          ) : (
+            <div className="grid">
+              {certificates.map((c) => (
+                <Link key={c.id} href={`/verify/${c.id}`} className="card job">
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                    <h3>{c.title || "Verified reel"}</h3>
+                    <span className="pill accepted">✦ Verified</span>
+                  </div>
+                  <div className="co">
+                    Verified by {c.verified_by_name || "an employer"}
+                    {c.verified_by_company ? ` · ${c.verified_by_company}` : ""}
+                  </div>
+                  {c.verified_project_title && (
+                    <p style={{ fontSize: 13, color: "var(--muted)" }}>
+                      for &ldquo;{c.verified_project_title}&rdquo;
+                    </p>
+                  )}
+                  <div className="foot">
+                    <span className="apply">View certificate →</span>
+                    {c.verified_at && (
+                      <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                        {new Date(c.verified_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }}>
