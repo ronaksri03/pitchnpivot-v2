@@ -90,7 +90,7 @@ export default function ProfileActions({ ownerId, username }) {
           {connectLabel}
         </button>
       )}
-      {!isOwner && connection?.status === "accepted" && (
+      {!isOwner && (
         <a href={`/messages/${ownerId}`} className="ghost">
           Message
         </a>
