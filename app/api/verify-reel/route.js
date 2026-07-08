@@ -97,10 +97,22 @@ export async function POST(request) {
     })
     .eq("id", reelId)
     .select()
-    .single();
+    .maybeSingle();
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 400 });
+  }
+
+  // No row came back → the database's row-level security blocked the write
+  // (the verification RLS policy for managers hasn't been applied yet).
+  if (!reel) {
+    return NextResponse.json(
+      {
+        error:
+          "Verification was blocked by the database. The manager-verification policy needs to be applied (supabase-migration-6.sql).",
+      },
+      { status: 403 }
+    );
   }
 
   await notify(supabase, {
