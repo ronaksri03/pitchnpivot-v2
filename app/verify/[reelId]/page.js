@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getVerifiedCredential } from "@/lib/credentials";
 import CopyCredentialLink from "@/components/CopyCredentialLink";
+import PrintButton from "@/components/PrintButton";
 
 export const revalidate = 60;
 
@@ -34,75 +35,89 @@ export default async function VerifyCredentialPage({ params }) {
   if (!credential) notFound();
 
   const { reel, candidate, candidateName, signatureValid, credentialId } = credential;
+  const employer = reel.verified_by_name || "An employer";
+  const employerLine = reel.verified_by_company
+    ? `${employer}, ${reel.verified_by_company}`
+    : employer;
 
   return (
     <div className="cert-wrap">
-      <div className="cert">
-        <span className="cert-seal">✦ Verified Proof of Work</span>
-        {credentialId && (
-          <span
-            className={signatureValid ? "verified-count" : "pill rejected"}
-            style={{ marginLeft: 10 }}
-          >
-            {signatureValid ? "✓ Signature valid" : "⚠ Signature mismatch"}
+      <article className="cert" id="certificate">
+        <div className="cert-topbar">
+          <span className="cert-brand">
+            pitch<em>N</em>pivot
           </span>
-        )}
-
-        <h1>{candidateName}</h1>
-        <p className="cert-sub">
-          {[candidate?.job_title, candidate?.location].filter(Boolean).join(" · ") ||
-            "pitchNpivot member"}
-        </p>
-
-        <div style={{ marginTop: 24 }}>
-          <div className="cert-row">
-            <span className="k">Verified reel</span>
-            <span className="v">{reel.title || "Untitled pitch"}</span>
-          </div>
-          <div className="cert-row">
-            <span className="k">Verified by</span>
-            <span className="v">
-              {reel.verified_by_name || "An employer"}
-              {reel.verified_by_company ? ` · ${reel.verified_by_company}` : ""}
+          {credentialId && (
+            <span className={signatureValid ? "cert-authentic" : "cert-tampered"}>
+              {signatureValid ? "✓ Authentic" : "⚠ Signature mismatch"}
             </span>
-          </div>
-          {reel.verified_project_title && (
-            <div className="cert-row">
-              <span className="k">Project</span>
-              <span className="v">{reel.verified_project_title}</span>
-            </div>
-          )}
-          <div className="cert-row">
-            <span className="k">Date verified</span>
-            <span className="v">{formatDate(reel.verified_at)}</span>
-          </div>
-          {(reel.skills ?? []).length > 0 && (
-            <div className="cert-row">
-              <span className="k">Skills demonstrated</span>
-              <span className="v">{reel.skills.join(", ")}</span>
-            </div>
           )}
         </div>
 
-        {reel.verification_note && (
-          <div className="cert-note">“{reel.verification_note}”</div>
+        <div className="cert-seal-badge" aria-hidden="true">
+          ✦
+        </div>
+        <span className="cert-kicker">Certificate of Verified Work</span>
+
+        <p className="cert-intro">This certifies that</p>
+        <h1 className="cert-name">{candidateName}</h1>
+        {[candidate?.job_title, candidate?.location].filter(Boolean).length > 0 && (
+          <p className="cert-sub">
+            {[candidate?.job_title, candidate?.location].filter(Boolean).join(" · ")}
+          </p>
         )}
 
+        <p className="cert-body">
+          completed and demonstrated real work
+          {reel.verified_project_title ? (
+            <>
+              {" "}
+              on the project <strong>&ldquo;{reel.verified_project_title}&rdquo;</strong>
+            </>
+          ) : null}
+          , independently reviewed and verified by <strong>{employerLine}</strong> on the
+          pitchNpivot platform.
+        </p>
+
+        {(reel.skills ?? []).length > 0 && (
+          <div className="cert-skills">
+            {reel.skills.map((s) => (
+              <span key={s} className="chip">
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {reel.verification_note && (
+          <div className="cert-note">&ldquo;{reel.verification_note}&rdquo;</div>
+        )}
+
+        <div className="cert-signatures">
+          <div className="cert-sig">
+            <div className="cert-sig-value">{employer}</div>
+            <div className="cert-sig-label">
+              Verified by{reel.verified_by_company ? ` · ${reel.verified_by_company}` : ""}
+            </div>
+          </div>
+          <div className="cert-sig">
+            <div className="cert-sig-value">{formatDate(reel.verified_at)}</div>
+            <div className="cert-sig-label">Date verified</div>
+          </div>
+        </div>
+
         <p className="cert-fingerprint">
-          Credential ID: <b>{credentialId ?? "unsigned"}</b>
-          <br />
           {credentialId ? (
             <>
-              This record is served live from pitchnpivot.com. The ID is an HMAC-SHA256 signature
-              computed server-side at verification time over the verifying employer, project, and
-              timestamp shown above, using a secret key never exposed to the browser or database
-              clients — it cannot be reproduced without that key, so it can&apos;t be forged even
-              by someone with direct database access.
+              Credential ID <b>{credentialId}</b> · cryptographically signed and served live from
+              pitchnpivot.com. The ID is an HMAC-SHA256 signature over the verifying employer,
+              project, and date above — it can&apos;t be forged without pitchNpivot&apos;s private
+              key.
               {!signatureValid &&
-                " The recomputed signature no longer matches what's stored — the verification fields shown above may have been altered after signing."}
+                " This credential&apos;s signature no longer matches its contents — the fields may have been altered after signing."}
             </>
           ) : (
-            "This verification predates signed credentials and has no integrity signature."
+            "This verification predates signed credentials and carries no integrity signature."
           )}
         </p>
 
@@ -118,8 +133,9 @@ export default async function VerifyCredentialPage({ params }) {
             </Link>
           )}
           <CopyCredentialLink reelId={reel.id} />
+          <PrintButton />
         </div>
-      </div>
+      </article>
     </div>
   );
 }
