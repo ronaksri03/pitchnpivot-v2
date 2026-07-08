@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { notify } from "@/lib/notifications";
 
@@ -28,6 +28,17 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
   const [coverNote, setCoverNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [view, setView] = useState("tiles");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("jobsView");
+    if (saved === "tiles" || saved === "table") setView(saved);
+  }, []);
+
+  function chooseView(v) {
+    setView(v);
+    window.localStorage.setItem("jobsView", v);
+  }
 
   async function openApply(job) {
     setApplyingTo(job);
@@ -134,6 +145,64 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
     );
   }
 
+  function renderJobRow(job, application) {
+    return (
+      <tr key={job.id}>
+        <td>
+          <b>{job.title}</b>
+        </td>
+        <td>{job.manager?.company || "—"}</td>
+        <td>{[job.work_type, job.employment_type].filter(Boolean).join(" · ") || "—"}</td>
+        <td>{formatSalary(job)}</td>
+        <td className="jt-skills">
+          {(job.skills_required ?? []).slice(0, 3).join(", ") || "—"}
+        </td>
+        <td className="jt-action">
+          {application ? (
+            <span className={`pill ${application.status}`}>{application.status}</span>
+          ) : (
+            <button type="button" className="apply" onClick={() => openApply(job)}>
+              Apply →
+            </button>
+          )}
+        </td>
+      </tr>
+    );
+  }
+
+  function renderGroup(items, withApplication) {
+    if (view === "table") {
+      return (
+        <div className="jt-wrap">
+          <table className="jt">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Company</th>
+                <th>Type</th>
+                <th>Pay</th>
+                <th>Skills</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((it) =>
+                withApplication ? renderJobRow(it.job, it.application) : renderJobRow(it, null)
+              )}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    return (
+      <div className="grid">
+        {items.map((it) =>
+          withApplication ? renderJobCard(it.job, it.application) : renderJobCard(it, null)
+        )}
+      </div>
+    );
+  }
+
   const groups = [
     { id: "accepted", label: "Accepted", items: applied.accepted },
     { id: "pending", label: "Pending", items: applied.pending },
@@ -147,9 +216,29 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
         <h1 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)" }}>
           Jobs that hire on proof, not paper
         </h1>
-        <p style={{ color: "var(--muted)", marginTop: 8, marginBottom: 32, maxWidth: "56ch" }}>
-          Roles from teams that would rather watch what you can do than scan a CV.
-        </p>
+        <div className="jobs-toolbar">
+          <p style={{ color: "var(--muted)", maxWidth: "56ch", margin: 0 }}>
+            Roles from teams that would rather watch what you can do than scan a CV.
+          </p>
+          <div className="view-toggle" role="group" aria-label="View mode">
+            <button
+              type="button"
+              className={view === "tiles" ? "active" : ""}
+              onClick={() => chooseView("tiles")}
+              aria-pressed={view === "tiles"}
+            >
+              ▦ Tiles
+            </button>
+            <button
+              type="button"
+              className={view === "table" ? "active" : ""}
+              onClick={() => chooseView("table")}
+              aria-pressed={view === "table"}
+            >
+              ▤ Table
+            </button>
+          </div>
+        </div>
 
         {hasAnyApplication &&
           groups
@@ -159,9 +248,7 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
                 <span className="label">
                   {g.label} ({g.items.length})
                 </span>
-                <div className="grid">
-                  {g.items.map(({ job, application }) => renderJobCard(job, application))}
-                </div>
+                {renderGroup(g.items, true)}
               </div>
             ))}
 
@@ -174,7 +261,7 @@ export default function IndividualJobBoard({ userId, initialJobs, initialApplica
                 : "No open roles right now — check back soon."}
             </div>
           ) : (
-            <div className="grid">{notApplied.map((job) => renderJobCard(job, null))}</div>
+            renderGroup(notApplied, false)
           )}
         </div>
       </section>

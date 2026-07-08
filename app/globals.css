@@ -216,6 +216,20 @@ select.field{appearance:none}
 .nf p{color:var(--muted);margin-bottom:14px}
 .nf .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 
+/* Jobs view toggle + table */
+.jobs-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:8px 0 32px}
+.view-toggle{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px}
+.view-toggle button{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;padding:7px 14px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s}
+.view-toggle button.active{background:rgba(255,209,0,.14);color:var(--volt)}
+.jt-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.jt{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+.jt thead th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:12px 16px;border-bottom:1px solid var(--line)}
+.jt tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.jt tbody tr:last-child td{border-bottom:none}
+.jt tbody tr:hover{background:rgba(255,255,255,.03)}
+.jt-skills{color:var(--muted)}
+.jt-action{text-align:right;white-space:nowrap}
+
 /* Messaging */
 .msg-avatar{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;font-family:Archivo,"Arial Black",sans-serif;font-weight:900;font-size:16px;color:#000;background:linear-gradient(135deg,#FFD100,#FF7A00)}
 .thread-head{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}
