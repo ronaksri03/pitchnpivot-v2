@@ -19,6 +19,7 @@ const EMPTY_FORM = {
   payType: "paid",
   skillsRequired: "",
   visibility: "public",
+  assignTo: "",
 };
 
 export default function ManagerProjectBoard({ managerId, manager, initialProjects }) {
@@ -42,6 +43,30 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
     setError("");
 
     const supabase = getSupabaseBrowserClient();
+
+    // For an assigned (private) project, resolve the entered username to a
+    // real individual id first.
+    let assignedTo = null;
+    if (form.visibility === "assigned") {
+      const handle = form.assignTo.trim().replace(/^@/, "");
+      if (!handle) {
+        setSaving(false);
+        setError("Enter the username of the individual to assign this to.");
+        return;
+      }
+      const { data: target } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .eq("username", handle)
+        .maybeSingle();
+      if (!target) {
+        setSaving(false);
+        setError(`No individual found with username "${handle}".`);
+        return;
+      }
+      assignedTo = target.id;
+    }
+
     const { data, error: insertError } = await supabase
       .from("manager_projects")
       .insert({
@@ -55,6 +80,7 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
           .map((s) => s.trim())
           .filter(Boolean),
         visibility: form.visibility,
+        assigned_to: assignedTo,
         status: "open",
       })
       .select()
@@ -64,6 +90,14 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
     if (insertError) {
       setError(insertError.message);
       return;
+    }
+
+    if (assignedTo) {
+      await notify(supabase, {
+        userId: assignedTo,
+        type: "project_assigned",
+        payload: { projectId: data.id, projectTitle: data.title },
+      });
     }
 
     setProjects([data, ...projects]);
@@ -268,9 +302,28 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
               value={form.visibility}
               onChange={(e) => setForm({ ...form, visibility: e.target.value })}
             >
-              <option value="public">Public — visible on the Lab</option>
-              <option value="private">Private — hidden from listings</option>
+              <option value="public">Public — anyone can pick it up &amp; submit</option>
+              <option value="assigned">Assigned — private to one individual</option>
             </select>
+
+            {form.visibility === "assigned" && (
+              <>
+                <label className="fieldlabel" htmlFor="p-assign">
+                  Assign to (username)
+                </label>
+                <input
+                  id="p-assign"
+                  className="field"
+                  placeholder="e.g. saurabhsri03"
+                  value={form.assignTo}
+                  onChange={(e) => setForm({ ...form, assignTo: e.target.value })}
+                />
+                <p className="msg">
+                  Only this individual will see the project on their Lab. It won&apos;t appear in
+                  public listings.
+                </p>
+              </>
+            )}
 
             {error && <p className="msg error">{error}</p>}
 
@@ -295,6 +348,9 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
                   </div>
                 </div>
                 <div className="chips">
+                  <span className="chip">
+                    {project.visibility === "assigned" ? "🔒 Assigned" : "🌐 Public"}
+                  </span>
                   {(project.skills_required ?? []).map((s) => (
                     <span key={s} className="chip">
                       {s}

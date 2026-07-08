@@ -31,7 +31,7 @@ export default async function LabPage() {
   }
 
   const [projects, submissions] = await Promise.all([
-    getOpenProjects(),
+    getOpenProjects(user.id),
     getMySubmissions(user.id),
   ]);
 

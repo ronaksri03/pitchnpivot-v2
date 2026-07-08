@@ -31,6 +31,8 @@ function describe(n) {
       return { text: "Your connection request was accepted", href: "/connections" };
     case "new_message":
       return { text: "You have a new message", href: p.from ? `/messages/${p.from}` : "/messages" };
+    case "project_assigned":
+      return { text: `You were assigned "${p.projectTitle}"`, href: "/lab" };
     default:
       return { text: "New notification", href: "#" };
   }

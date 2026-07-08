@@ -111,6 +111,9 @@ export default function IndividualProjectBoard({ userId, initialProjects, initia
           <p style={{ fontSize: 13, color: "var(--muted)" }}>{project.description}</p>
         )}
         <div className="chips">
+          {project.visibility === "assigned" && (
+            <span className="pill accepted">🔒 Assigned to you</span>
+          )}
           {(project.skills_required ?? []).map((s) => (
             <span key={s} className="chip">
               {s}
