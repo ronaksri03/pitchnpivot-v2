@@ -44,13 +44,25 @@ export async function POST(request) {
 
   const { data: submission } = await supabase
     .from(SUBMISSION_TABLE[type])
-    .select(`id, reel_id, ${POST_FK[type]}`)
+    .select(`id, individual_id, ${POST_FK[type]}`)
     .eq("id", submissionId)
     .maybeSingle();
 
-  if (!submission || submission[POST_FK[type]] !== postId || submission.reel_id !== reelId) {
+  if (!submission || submission[POST_FK[type]] !== postId) {
+    return NextResponse.json({ error: "That submission isn't for this posting." }, { status: 403 });
+  }
+
+  // The manager may verify any reel belonging to the applicant — not only a
+  // reel they happened to attach at submission time (patent claim 8).
+  const { data: targetReel } = await supabase
+    .from("reels")
+    .select("id, user_id")
+    .eq("id", reelId)
+    .maybeSingle();
+
+  if (!targetReel || targetReel.user_id !== submission.individual_id) {
     return NextResponse.json(
-      { error: "This reel isn't linked to that submission." },
+      { error: "That reel doesn't belong to this applicant." },
       { status: 403 }
     );
   }

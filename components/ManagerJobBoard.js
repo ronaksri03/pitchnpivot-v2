@@ -47,6 +47,8 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
   const [verificationNote, setVerificationNote] = useState("");
   const [verifySaving, setVerifySaving] = useState(false);
   const [verifyError, setVerifyError] = useState("");
+  const [verifyReels, setVerifyReels] = useState([]);
+  const [selectedReelId, setSelectedReelId] = useState("");
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -156,14 +158,31 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
     });
   }
 
-  function openVerify(application) {
+  async function openVerify(application) {
     setVerifying(application);
     setVerificationNote("");
     setVerifyError("");
+    setVerifyReels([]);
+    setSelectedReelId(application.reel_id || "");
+
+    const supabase = getSupabaseBrowserClient();
+    const { data } = await supabase
+      .from("reels")
+      .select("id, title, is_verified")
+      .eq("user_id", application.individual_id)
+      .eq("visibility", "public")
+      .order("created_at", { ascending: false });
+    const reels = data ?? [];
+    setVerifyReels(reels);
+    if (!application.reel_id && reels.length) setSelectedReelId(reels[0].id);
   }
 
   async function handleVerify(e) {
     e.preventDefault();
+    if (!selectedReelId) {
+      setVerifyError("Pick a reel to verify.");
+      return;
+    }
     setVerifySaving(true);
     setVerifyError("");
 
@@ -171,7 +190,7 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        reelId: verifying.reel_id,
+        reelId: selectedReelId,
         type: "job",
         postId: selectedJob.id,
         submissionId: verifying.id,
@@ -187,11 +206,7 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
       return;
     }
 
-    setApplicants(
-      applicants.map((a) =>
-        a.id === verifying.id ? { ...a, reel: { ...a.reel, is_verified: true } } : a
-      )
-    );
+    setVerifyReels(verifyReels.map((r) => (r.id === selectedReelId ? { ...r, is_verified: true } : r)));
     setVerifying(null);
   }
 
@@ -472,12 +487,9 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
                           Reject
                         </button>
                       )}
-                      {a.reel && !a.reel.is_verified && (
-                        <button type="button" className="cta" onClick={() => openVerify(a)}>
-                          ✦ Verify Reel
-                        </button>
-                      )}
-                      {a.reel?.is_verified && <span className="msg">✦ Reel verified</span>}
+                      <button type="button" className="cta" onClick={() => openVerify(a)}>
+                        ✦ Verify Reel
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -510,6 +522,30 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
               accurately demonstrates their contribution. This is permanently recorded.
             </p>
             <form onSubmit={handleVerify} className="authform">
+              <label className="fieldlabel" htmlFor="job-verify-reel">
+                Reel to verify
+              </label>
+              {verifyReels.length === 0 ? (
+                <p className="msg">
+                  This applicant has no public reels to verify. Ask them to post one, or set an
+                  existing reel to public.
+                </p>
+              ) : (
+                <select
+                  id="job-verify-reel"
+                  className="field"
+                  value={selectedReelId}
+                  onChange={(e) => setSelectedReelId(e.target.value)}
+                >
+                  {verifyReels.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.title || "Untitled pitch"}
+                      {r.is_verified ? " (already verified)" : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               <label className="fieldlabel" htmlFor="job-verify-note">
                 Verification note (optional)
               </label>
@@ -522,7 +558,11 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
               />
               {verifyError && <p className="msg error">{verifyError}</p>}
               <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
-                <button type="submit" className="cta big" disabled={verifySaving}>
+                <button
+                  type="submit"
+                  className="cta big"
+                  disabled={verifySaving || verifyReels.length === 0}
+                >
                   {verifySaving ? "Verifying…" : "Confirm verification"}
                 </button>
                 <button type="button" className="ghost" onClick={() => setVerifying(null)}>

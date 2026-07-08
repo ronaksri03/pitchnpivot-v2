@@ -36,6 +36,8 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
   const [verificationNote, setVerificationNote] = useState("");
   const [verifySaving, setVerifySaving] = useState(false);
   const [verifyError, setVerifyError] = useState("");
+  const [verifyReels, setVerifyReels] = useState([]);
+  const [selectedReelId, setSelectedReelId] = useState("");
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -173,14 +175,33 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
     });
   }
 
-  function openVerify(submission) {
+  async function openVerify(submission) {
     setVerifying(submission);
     setVerificationNote("");
     setVerifyError("");
+    setVerifyReels([]);
+    setSelectedReelId(submission.reel_id || "");
+
+    // Load the applicant's public reels so the manager can pick which one to
+    // verify (patent claim 8) — not just a reel they attached at submit time.
+    const supabase = getSupabaseBrowserClient();
+    const { data } = await supabase
+      .from("reels")
+      .select("id, title, is_verified")
+      .eq("user_id", submission.individual_id)
+      .eq("visibility", "public")
+      .order("created_at", { ascending: false });
+    const reels = data ?? [];
+    setVerifyReels(reels);
+    if (!submission.reel_id && reels.length) setSelectedReelId(reels[0].id);
   }
 
   async function handleVerify(e) {
     e.preventDefault();
+    if (!selectedReelId) {
+      setVerifyError("Pick a reel to verify.");
+      return;
+    }
     setVerifySaving(true);
     setVerifyError("");
 
@@ -188,7 +209,7 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        reelId: verifying.reel_id,
+        reelId: selectedReelId,
         type: "project",
         postId: selectedProject.id,
         submissionId: verifying.id,
@@ -204,9 +225,10 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
       return;
     }
 
+    setVerifyReels(verifyReels.map((r) => (r.id === selectedReelId ? { ...r, is_verified: true } : r)));
     setSubmissions(
       submissions.map((s) =>
-        s.id === verifying.id ? { ...s, reel: { ...s.reel, is_verified: true } } : s
+        s.id === verifying.id ? { ...s, reelVerified: true } : s
       )
     );
     setVerifying(null);
@@ -437,16 +459,9 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
                           Reject
                         </button>
                       )}
-                      {s.reel && !s.reel.is_verified && (
-                        <button
-                          type="button"
-                          className="cta"
-                          onClick={() => openVerify(s)}
-                        >
-                          ✦ Verify Reel
-                        </button>
-                      )}
-                      {s.reel?.is_verified && <span className="msg">✦ Reel verified</span>}
+                      <button type="button" className="cta" onClick={() => openVerify(s)}>
+                        ✦ Verify Reel
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -479,6 +494,30 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
               reel accurately demonstrates their contribution. This is permanently recorded.
             </p>
             <form onSubmit={handleVerify} className="authform">
+              <label className="fieldlabel" htmlFor="verify-reel">
+                Reel to verify
+              </label>
+              {verifyReels.length === 0 ? (
+                <p className="msg">
+                  This applicant has no public reels to verify. Ask them to post one, or set an
+                  existing reel to public.
+                </p>
+              ) : (
+                <select
+                  id="verify-reel"
+                  className="field"
+                  value={selectedReelId}
+                  onChange={(e) => setSelectedReelId(e.target.value)}
+                >
+                  {verifyReels.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.title || "Untitled pitch"}
+                      {r.is_verified ? " (already verified)" : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               <label className="fieldlabel" htmlFor="verify-note">
                 Verification note (optional)
               </label>
@@ -491,7 +530,11 @@ export default function ManagerProjectBoard({ managerId, manager, initialProject
               />
               {verifyError && <p className="msg error">{verifyError}</p>}
               <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
-                <button type="submit" className="cta big" disabled={verifySaving}>
+                <button
+                  type="submit"
+                  className="cta big"
+                  disabled={verifySaving || verifyReels.length === 0}
+                >
                   {verifySaving ? "Verifying…" : "Confirm verification"}
                 </button>
                 <button type="button" className="ghost" onClick={() => setVerifying(null)}>
