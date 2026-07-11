@@ -90,11 +90,12 @@ section{padding:88px 24px;max-width:1100px;margin:0 auto}
 .feed-item{width:100%;display:flex;justify-content:center}
 .feed-item .phone{width:min(320px,100%)}
 
-/* Mobile: immersive full-screen snap feed */
+/* Mobile: keep search visible; single-column scroll (no forced full-screen snap) */
 @media (max-width:820px){
-  .discover-head,.discover-filters,.discover-skills{display:none}
-  .feed{max-width:none;margin:0;height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;padding:56px 0 0;display:block}
-  .feed-item{height:calc(100dvh - 56px);scroll-snap-align:start;display:grid;place-items:center;padding:16px}
+  .discover-head{display:none}
+  .discover-filters{padding:76px 16px 0}
+  .discover-skills{padding:12px 16px 0;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .feed{grid-template-columns:1fr;padding:16px;gap:20px}
   .feed-item .phone{width:min(340px,88vw)}
 }
 

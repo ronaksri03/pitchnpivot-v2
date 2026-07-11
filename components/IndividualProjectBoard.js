@@ -21,6 +21,23 @@ export default function IndividualProjectBoard({ userId, initialProjects, initia
   const [reelId, setReelId] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+
+  function matchesQuery(project) {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    const haystack = [
+      project.title,
+      project.description,
+      project.manager?.name,
+      project.manager?.company,
+      ...(project.skills_required ?? []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(q);
+  }
 
   async function openApply(project) {
     setApplyingTo(project);
@@ -86,10 +103,11 @@ export default function IndividualProjectBoard({ userId, initialProjects, initia
   for (const sub of submissions) {
     const open = openById.get(sub.project_id);
     const project = open || sub.project || { id: sub.project_id, title: "Project" };
+    if (!matchesQuery(project)) continue;
     (applied[sub.status] || applied.pending).push({ project, submission: sub, manager: open?.manager });
   }
 
-  const notApplied = initialProjects.filter((p) => !submittedIds.has(p.id));
+  const notApplied = initialProjects.filter((p) => !submittedIds.has(p.id) && matchesQuery(p));
 
   function renderCard(project, submission, manager) {
     return (
@@ -151,10 +169,19 @@ export default function IndividualProjectBoard({ userId, initialProjects, initia
         <h1 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)" }}>
           Open projects &amp; collabs
         </h1>
-        <p style={{ color: "var(--muted)", marginTop: 8, marginBottom: 32, maxWidth: "56ch" }}>
+        <p style={{ color: "var(--muted)", marginTop: 8, marginBottom: 20, maxWidth: "56ch" }}>
           Real projects posted by managers. Apply with a link to your work and,
           optionally, one of your pitch reels as proof.
         </p>
+
+        <input
+          type="search"
+          className="field"
+          placeholder="Search projects by title, skill, or company…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{ maxWidth: 460, marginBottom: 32 }}
+        />
 
         {hasAnyApplication &&
           groups
