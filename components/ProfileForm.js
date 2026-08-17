@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import LocationInput from "@/components/LocationInput";
 
 export default function ProfileForm({ userId, profile }) {
   const router = useRouter();
@@ -102,10 +103,9 @@ export default function ProfileForm({ userId, profile }) {
       <label className="fieldlabel" htmlFor="location">
         Location
       </label>
-      <input
+      <LocationInput
         id="location"
-        className="field"
-        placeholder="NYC"
+        placeholder="Start typing, or pick from the list"
         value={location}
         onChange={(e) => setLocation(e.target.value)}
       />

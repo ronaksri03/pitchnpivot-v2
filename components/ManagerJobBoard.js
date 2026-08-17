@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { notify } from "@/lib/notifications";
+import LocationInput from "@/components/LocationInput";
 
 const WORK_TYPES = ["remote", "hybrid", "onsite"];
 const EMPLOYMENT_TYPES = ["full-time", "part-time", "contract", "freelance", "internship"];
@@ -256,10 +257,9 @@ export default function ManagerJobBoard({ managerId, manager, initialJobs }) {
             <label className="fieldlabel" htmlFor="j-location">
               Location
             </label>
-            <input
+            <LocationInput
               id="j-location"
-              className="field"
-              placeholder="e.g. London, UK"
+              placeholder="Start typing, or pick from the list"
               value={form.location}
               onChange={(e) => setForm({ ...form, location: e.target.value })}
             />
