@@ -254,6 +254,17 @@ select.field{appearance:none}
 .jt-skills{color:var(--muted)}
 .jt-action{text-align:right;white-space:nowrap}
 
+/* Legal pages (privacy, terms) */
+.legal{padding-top:120px;max-width:760px}
+.legal-meta{color:var(--muted);font-size:13px;margin-top:6px;margin-bottom:28px}
+.legal p{color:var(--muted);font-size:15px;line-height:1.8;margin-bottom:16px}
+.legal p strong{color:var(--text);font-weight:600}
+.legal h2{color:var(--text);font-size:19px;font-weight:700;margin:36px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
+.legal ul{color:var(--muted);font-size:15px;line-height:1.8;margin:0 0 16px;padding-left:22px}
+.legal li{margin-bottom:8px}
+.legal li strong{color:var(--text);font-weight:600}
+.legal a{color:var(--volt);text-decoration:underline;text-underline-offset:2px}
+
 /* Messaging */
 .msg-avatar{width:44px;height:44px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;font-family:Archivo,"Arial Black",sans-serif;font-weight:900;font-size:16px;color:#000;background:linear-gradient(135deg,#FFD100,#FF7A00)}
 .thread-head{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}
